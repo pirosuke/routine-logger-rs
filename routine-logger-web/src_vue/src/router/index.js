@@ -1,0 +1,28 @@
+import Vue from "vue";
+import VueRouter from "vue-router";
+import Home from "../views/Home.vue";
+
+Vue.use(VueRouter);
+
+const routes = [
+  {
+    path: "/",
+    name: "home",
+    component: Home,
+  },
+  {
+    path: "/Logs",
+    name: "Logs",
+    component: () =>
+      import(
+        /* webpackChunkName: "Logs" */ "../views/Logs.vue"
+      ),
+  },
+];
+
+const router = new VueRouter({
+  base: process.env.VUE_APP_AEC_BASE_URL,
+  routes,
+});
+
+export default router;
