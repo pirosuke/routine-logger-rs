@@ -32,5 +32,16 @@ export default new Vuex.Store({
         payload.editedItem,
       );
     },
+    async updateRoutine(context, payload) {
+      const res = await apiServer.put(
+        "/routines",
+        payload.editedItem,
+      );
+    },
+    async deleteRoutine(context, payload) {
+      const res = await apiServer.delete(
+        `/routines/${payload.editedItem.routine_id}`,
+      );
+    },
   },
 });

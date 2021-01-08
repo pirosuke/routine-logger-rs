@@ -5,6 +5,7 @@ create table routines(
     ,name varchar(255) not null
     ,unit_period varchar(255) not null default ''
     ,target_quantity double precision not null default 0.0
+    ,unit varchar(255) not null default ''
     ,insert_datetime timestamp with time zone not null default now()
     ,primary key(routine_id)
 )
