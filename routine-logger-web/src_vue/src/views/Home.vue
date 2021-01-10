@@ -165,11 +165,11 @@
     },
 
     mounted() {
-      this.$store.dispatch('fetchRoutines')
+      this.$store.dispatch('routines/fetchRoutines')
     },
     computed: {
         ...mapState({
-          routines: state => state.routines,
+          routines: state => state.routines.routines,
         })
     },
     methods: {
@@ -187,10 +187,10 @@
       addItem () {
         this.$refs.form.validate()
         if (this.isEditedRoutineValid) {
-          this.$store.dispatch('addRoutine', {
+          this.$store.dispatch('routines/addRoutine', {
             editedItem: this.editedItem,
           }).then(() => {
-            this.$store.dispatch('fetchRoutines')
+            this.$store.dispatch('routines/fetchRoutines')
           })
           this.close();
         }
@@ -205,10 +205,10 @@
       updateItem () {
         this.$refs.form.validate()
         if (this.isEditedRoutineValid) {
-          this.$store.dispatch('updateRoutine', {
+          this.$store.dispatch('routines/updateRoutine', {
             editedItem: this.editedItem,
           }).then(() => {
-            this.$store.dispatch('fetchRoutines')
+            this.$store.dispatch('routines/fetchRoutines')
           })
           this.close();
         }
@@ -225,10 +225,10 @@
       },
 
       deleteItem () {
-        this.$store.dispatch('deleteRoutine', {
+        this.$store.dispatch('routines/deleteRoutine', {
           editedItem: this.editedItem,
         }).then(() => {
-          this.$store.dispatch('fetchRoutines')
+          this.$store.dispatch('routines/fetchRoutines')
         })
         this.closeDeleteConfirm()
       },
