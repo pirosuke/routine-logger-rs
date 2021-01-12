@@ -18,6 +18,7 @@ create table routine_logs(
     ,routine_id int not null
     ,quantity numeric not null default 0.0
     ,note text not null default ''
+    ,date_of_activity date not null default current_date
     ,insert_datetime timestamp with time zone not null default now()
     ,primary key(log_id)
 )
