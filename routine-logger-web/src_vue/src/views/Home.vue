@@ -12,19 +12,44 @@
         :items="routines"
       >
         <template v-slot:item.actions="{ item }">
-          <v-icon
-            small
-            class="mr-2"
-            @click="showEditDialog(item)"
+          <v-btn
+            color="primary"
+            class="ma-2"
+            outlined
+            @click="showLogAddDialog(item)"
           >
-            mdi-pencil
-          </v-icon>
-          <v-icon
-            small
-            @click="showDeleteDialog(item)"
+            <v-icon
+              left
+            >mdi-plus-box</v-icon>
+            ログを追加
+          </v-btn>
+          <v-menu
+            bottom
+            offset-y
           >
-            mdi-delete
-          </v-icon>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                icon
+                class="ma-2"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                @click="showEditDialog(item)"
+              >
+                <v-list-item-title>ルーチンを編集する</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                @click="showDeleteDialog(item)"
+              >
+                <v-list-item-title>ルーチンを削除する</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </template>
 
         <template v-slot:top>
@@ -109,6 +134,68 @@
               </v-card>
             </v-dialog>
 
+            <v-dialog v-model="dialogLogAdd" max-width="700px">
+              <v-card>
+                <v-card-title>
+                  <span class="headline">{{editedItem.name}}ログを追加</span>
+                </v-card-title>
+
+                <v-card-text>
+                  <v-container>
+                    <v-form
+                      ref="logAddForm"
+                      v-model="isEditedLogValid"
+                      >
+                      <v-row>
+                        <v-col cols="6" sm="6" md="6">
+                          <v-menu
+                            ref="dateDialog"
+                            v-model="dateDialog"
+                            :close-on-content-click="false"
+                            transition="scale-transition"
+                            offset-y
+                            min-width="290px"
+                          >
+                            <template v-slot:activator="{on, attrs}">
+                              <v-text-field
+                                label="実施日"
+                                :rules="[rules.required]"
+                                prepend-icon="mdi-calendar"
+                                readonly
+                                v-bind="attrs"
+                                v-on="on"
+                                v-model="editedLog.date_of_activity"
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker
+                              v-model="editedLog.date_of_activity"
+                              @input="dateDialog = false"
+                              no-title
+                              scrollable
+                            >
+                            </v-date-picker>
+                          </v-menu>
+                        </v-col>
+                        <v-col cols="6" sm="6" md="6">
+                          <v-text-field
+                            :rules="[rules.required, rules.numOnly]"
+                            v-model="editedLog.quantity"
+                            :suffix="editedItem.unit"
+                            label="回数"></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-form>
+                  </v-container>
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" @click="closeLogAddDialog">キャンセル</v-btn>
+                  <v-btn color="blue darken-1" @click="addLog">追加する</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
           </v-toolbar>
         </template>
 
@@ -137,9 +224,13 @@
         ],
         dialog: false,
         dialogDeleteConfirm: false,
+        dialogLogAdd: false,
         isEditedRoutineValid: true,
+        isEditedLogValid: true,
         editedIndex: -1,
         editedItem: {
+        },
+        editedLog: {
         },
         defaultItem: {
           routine_id: 0,
@@ -151,7 +242,7 @@
         rules: {
           required: value => !!value || '必須項目です',
           numOnly: value => {
-            const pattern = /^[0-9]*$/
+            const pattern = /^[0-9\.]*$/
             return pattern.test(value) || '数値以外の文字が含まれています'
           },
         },
@@ -231,6 +322,29 @@
           this.$store.dispatch('routines/fetchRoutines')
         })
         this.closeDeleteConfirm()
+      },
+
+      showLogAddDialog (item) {
+        this.editedIndex = this.routines.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialogLogAdd = true
+      },
+
+      addLog () {
+        this.$refs.logAddForm.validate()
+        if (this.isEditedLogValid) {
+          this.$store.dispatch('routineLogs/addLog', {
+            editedItem: Object.assign({
+              routine_id: this.editedItem.routine_id,
+            }, this.editedLog),
+          })
+          this.closeLogAddDialog()
+        }
+      },
+
+      closeLogAddDialog () {
+        this.$refs.logAddForm.resetValidation()
+        this.dialogLogAdd = false
       },
     }
   }

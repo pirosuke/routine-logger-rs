@@ -6,6 +6,8 @@ use log::{info};
 use serde::{Deserialize, Serialize};
 use r2d2_postgres::{postgres, r2d2::Pool, PostgresConnectionManager};
 
+use crate::routes::{JSNumberType};
+
 #[derive(Serialize, Deserialize)]
 pub struct Routine {
     routine_id: i32,
@@ -15,13 +17,6 @@ pub struct Routine {
     target_quantity: f64,
     unit: String,
     insert_datetime: String,
-}
-
-#[derive(Clone, Deserialize, Serialize, Debug)]
-#[serde(untagged)]
-pub enum JSNumberType {
-    Float(f64),
-    Str(Option<String>),
 }
 
 #[derive(Deserialize)]
@@ -44,7 +39,7 @@ pub struct RoutineUpdateForm {
 #[get("")]
 pub async fn routine_get_handler(pg_pool: web::Data<Pool<PostgresConnectionManager<postgres::NoTls>>>) -> HttpResponse {
     info!("start routine_get_handler");
-    let sql = include_str!("../../sql/routines/select_routines.sql");
+    let sql = include_str!("../sql/routines/select_routines.sql");
 
     let mut pg_client = pg_pool.get().unwrap();
 
@@ -75,7 +70,7 @@ pub async fn routine_add_handler(pg_pool: web::Data<Pool<PostgresConnectionManag
     };
     let unit = params.unit.clone().unwrap_or("".to_string());
 
-    let sql = include_str!("../../sql/routines/insert_routine.sql");
+    let sql = include_str!("../sql/routines/insert_routine.sql");
 
     let mut pg_client = pg_pool.get().unwrap();
 
@@ -112,7 +107,7 @@ pub async fn routine_update_handler(pg_pool: web::Data<Pool<PostgresConnectionMa
     };
     let unit = params.unit.clone().unwrap_or("".to_string());
 
-    let sql = include_str!("../../sql/routines/update_routine.sql");
+    let sql = include_str!("../sql/routines/update_routine.sql");
 
     let mut pg_client = pg_pool.get().unwrap();
 
@@ -141,7 +136,7 @@ pub async fn routine_update_handler(pg_pool: web::Data<Pool<PostgresConnectionMa
 pub async fn routine_delete_handler(pg_pool: web::Data<Pool<PostgresConnectionManager<postgres::NoTls>>>, web::Path(routine_id): web::Path<i32>) -> HttpResponse {
     info!("start routine_delete_handler");
 
-    let sql = include_str!("../../sql/routines/delete_routine.sql");
+    let sql = include_str!("../sql/routines/delete_routine.sql");
 
     let mut pg_client = pg_pool.get().unwrap();
 

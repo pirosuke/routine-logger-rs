@@ -15,6 +15,7 @@ use r2d2_postgres::{postgres, r2d2::Pool, PostgresConnectionManager};
 
 mod routes;
 use routes::routines;
+use routes::routine_logs;
 
 #[derive(Deserialize)]
 struct DbConfig {
@@ -84,6 +85,12 @@ async fn main() -> std::io::Result<()> {
                     .service(routines::routine_add_handler)
                     .service(routines::routine_update_handler)
                     .service(routines::routine_delete_handler)
+            )
+            .service(
+                web::scope("/routine_logs")
+                    .service(routine_logs::log_get_handler)
+                    .service(routine_logs::log_add_handler)
+                    .service(routine_logs::log_delete_handler)
             )
             .service(fs::Files::new("/", public_dir_path.clone()).show_files_listing())
     })
