@@ -10,6 +10,7 @@ use crate::routes::{JSNumberType};
 
 #[derive(Serialize, Deserialize)]
 pub struct RoutineLog {
+    count: i64,
     log_id: i32,
     user_id: i32,
     routine_id: i32,
@@ -21,6 +22,12 @@ pub struct RoutineLog {
 }
 
 #[derive(Deserialize)]
+pub struct RoutineLogSearchForm {
+    page: Option<i64>,
+    limit: Option<i64>,
+}
+
+#[derive(Deserialize)]
 pub struct RoutineLogAddForm {
     routine_id: i32,
     quantity: JSNumberType,
@@ -28,15 +35,24 @@ pub struct RoutineLogAddForm {
 }
 
 #[get("")]
-pub async fn log_get_handler(pg_pool: web::Data<Pool<PostgresConnectionManager<postgres::NoTls>>>) -> HttpResponse {
+pub async fn log_get_handler(pg_pool: web::Data<Pool<PostgresConnectionManager<postgres::NoTls>>>, params: web::Query<RoutineLogSearchForm>) -> HttpResponse {
     info!("start log_get_handler");
+
+    let page = params.page.unwrap_or(1);
+    let limit = params.limit.unwrap_or(10);
+    let offset = (page - 1) * limit;
+
     let sql = include_str!("../sql/routine_logs/select_logs.sql");
 
     let mut pg_client = pg_pool.get().unwrap();
 
     let mut log_list: Vec<RoutineLog> = Vec::new();
-    for row in pg_client.query(sql, &[]).unwrap() {
+    for row in pg_client.query(sql, &[
+        &offset,
+        &limit,
+    ]).unwrap() {
         log_list.push(RoutineLog{
+            count: row.get("count"),
             log_id: row.get("log_id"),
             routine_id: row.get("routine_id"),
             routine_name: row.get("routine_name"),
@@ -72,6 +88,7 @@ pub async fn log_add_handler(pg_pool: web::Data<Pool<PostgresConnectionManager<p
     ]).unwrap();
 
     let routine = RoutineLog{
+        count: 0,
         log_id: row.get("log_id"),
         routine_id: row.get("routine_id"),
         routine_name: String::from(""),
@@ -98,6 +115,7 @@ pub async fn log_delete_handler(pg_pool: web::Data<Pool<PostgresConnectionManage
     ]).unwrap();
 
     let routine = RoutineLog{
+        count: 0,
         log_id: row.get("log_id"),
         routine_id: row.get("routine_id"),
         routine_name: String::from(""),

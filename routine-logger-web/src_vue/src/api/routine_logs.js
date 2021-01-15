@@ -5,9 +5,13 @@ const apiServer = axios.create({
 })
 
 export default {
-    async fetchLogs() {
+    async fetchLogs(page, itemsPerPage) {
         const res = await apiServer.get("/routine_logs", {
             responseType: "json",
+            params: {
+              page,
+              limit: itemsPerPage,
+            }
         })
         return res.data
     },

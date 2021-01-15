@@ -8,7 +8,14 @@
 
       <v-data-table
         :headers="headers"
-        :items="routine_logs"
+        :items="routineLogs"
+        :disable-sort=true
+        :options.sync="fetchOptions"
+        :server-items-length="logCount"
+        :loading="loading"
+        :footer-props="{
+          'items-per-page-options': [10,20,30,50]
+        }"
       >
         <template v-slot:item.actions="{ item }">
           <v-menu
@@ -75,18 +82,42 @@
         editedIndex: -1,
         editedItem: {
         },
+        loading: false,
+        logCount: 0,
+        fetchOptions: {},
       }
     },
 
     mounted() {
-      this.$store.dispatch('routineLogs/fetchLogs')
     },
     computed: {
         ...mapState({
-          routine_logs: state => state.routineLogs.logs,
         }),
     },
+    watch: {
+      fetchOptions: {
+        handler () {
+          this.getLogData()
+        },
+        deep: true
+      }
+    },
     methods: {
+      getLogData () {
+        this.loading = true;
+
+        const { sortBy, sortDesc, page, itemsPerPage } = this.fetchOptions;
+
+        this.$store.dispatch('routineLogs/fetchLogs', {
+          page,
+          itemsPerPage,
+        }).then(() => {
+          this.routineLogs = this.$store.state.routineLogs.logs;
+          this.logCount = this.$store.state.routineLogs.logCount;
+          this.loading = false;
+        });
+      },
+
       showDeleteDialog (item) {
         this.editedIndex = this.routine_logs.indexOf(item)
         this.editedItem = Object.assign({}, item)
