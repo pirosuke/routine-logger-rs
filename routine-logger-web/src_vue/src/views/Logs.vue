@@ -119,7 +119,7 @@
       },
 
       showDeleteDialog (item) {
-        this.editedIndex = this.routine_logs.indexOf(item)
+        this.editedIndex = this.routineLogs.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialogDeleteConfirm = true
       },
@@ -132,7 +132,7 @@
         this.$store.dispatch('routineLogs/deleteLog', {
           editedItem: this.editedItem,
         }).then(() => {
-          this.$store.dispatch('routineLogs/fetchLogs')
+          this.getLogData()
         })
         this.closeDeleteConfirm()
       },
